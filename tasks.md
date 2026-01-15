@@ -42,7 +42,8 @@ Stored in `todos.json`. Note that `id` must be unique (UUID).
 - [x] **3. User Authentication**
     - Implement a login function and store the login details in a JSON file.
     - Implement a sign up function.
-- [x] **4. Items Interaction**
+
+- [x] **4. Items Interaction
     - Implement a function to create a to-do-list item.
     - Implement a function to view all to-do-list items.
     - Implement a function to view the to-do-list item details (Title, Details, Priority (high, low, mid), Status (completed, pending), Owner, Updated date, Created date).
