@@ -39,3 +39,11 @@ Stored in `todos.json`. Note that `id` must be unique (UUID).
     - Implement a main application loop.
     - Create a "Pre-Login" menu: Options for [1] Login, [2] Sign Up, [3] Exit.
 
+- [x] **3. User Authentication**
+    - Implement a login function and store the login details in a JSON file.
+    - Implement a sign up function.
+- [x] **4. Items Interaction**
+    - Implement a function to create a to-do-list item.
+    - Implement a function to view all to-do-list items.
+    - Implement a function to view the to-do-list item details (Title, Details, Priority (high, low, mid), Status (completed, pending), Owner, Updated date, Created date).
+    - Create a function to enable marking to-do-list item as completed.
