@@ -3,6 +3,8 @@
 This module implements the CLI interface with a REPL-style interaction.
 """
 
+import json
+import os
 
 def display_pre_login_menu():
     """Display the pre-login menu options."""
@@ -24,26 +26,59 @@ def get_user_choice():
     choice = input("Please select an option (1-3): ").strip()
     return choice
 
+# ================= Load & Save users from/to JSON =============== 
+def load_users(filename="login.json"):
+    """Load users from JSON file."""
+    if os.path.exists(filename):
+        with open(filename, 'r') as f:
+            return json.load(f)
+    return []
 
-def handle_login():
+def save_users(users, filename="login.json"):
+    """Save users to JSON file."""
+    with open(filename, 'w') as f:
+        json.dump(users, f, indent=4)
+
+# =================== User Login here =================== 
+def handle_login(users):
     """Handle the login process."""
     print("\n--- Login ---")
-    print("Login functionality coming soon...")
+    username = input("Username: ").strip()
+    password = input("Password: ").strip()
     # TODO: Implement login logic
+    for user in users:
+        if user.get("username") == username and str(user.get("password")) == password:
+            print(f"Login successful! Welcome back, {username}!")
+            return
+    print("Invalid username or password.")
 
-
+# =================== User Signup here ===================
 def handle_signup():
     """Handle the signup process."""
     print("\n--- Sign Up ---")
-    print("Sign up functionality coming soon...")
-    # TODO: Implement signup logic
+    username = input("Username: ").strip()
+    password = input("Password: ").strip()
+    
+    users = load_users()
+    # TODO: Implement login logic
+    # Check if username already exists
+    for user in users:
+        if user.get("username") == username:
+            print("Username already exists. Please choose another.")
+            return
 
+    users.append({"username": username, "password": password})
+    save_users(users)
+    print(f"Account created successfully! Welcome, {username}!")
 
 def main():
     """Main application loop.
 
     Implements a REPL (Read-Eval-Print Loop) for the CLI application.
     """
+
+    users = [{}]  # Placeholder for user data storage
+
     print("Starting To-Do List Application...")
 
     while True:
@@ -51,7 +86,8 @@ def main():
         choice = get_user_choice()
 
         if choice == "1":
-            handle_login()
+            users = load_users()
+            handle_login(users)
         elif choice == "2":
             handle_signup()
         elif choice == "3":
