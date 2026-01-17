@@ -1,0 +1,6 @@
+# Core dependencies
+# Add your application dependencies here
+
+# Development dependencies
+pytest>=8.0.0
+ruff>=0.1.0
