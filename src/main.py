@@ -344,6 +344,53 @@ def handle_edit_todo(username):
     save_todos(todos)
     print(f"\n✓ To-Do item updated successfully!")
 
+# =================== Mark Todo as Completed here ===================
+def handle_mark_todo_completed(username):
+    """Handle marking a to-do item as completed.
+    
+    Args:
+        username: The username of the current user.
+    """
+    todos = load_todos()
+    
+    # Get user's todos that are not yet completed
+    user_todos = [todo for todo in todos if todo.owner == username and todo.status == Status.PENDING]
+    
+    if not user_todos:
+        print("\n✗ You have no pending to-do items to mark as completed.")
+        return
+    
+    print("\n--- Mark To-Do as Completed ---")
+    print("\nYour pending to-do items:")
+    for idx, todo in enumerate(user_todos, 1):
+        print(f"[{idx}] {todo.title} (Priority: {todo.priority.value})")
+    
+    try:
+        choice = int(input("\nSelect item number to mark as completed (0 to cancel): ").strip())
+        if choice == 0:
+            return
+        if choice < 1 or choice > len(user_todos):
+            print("Invalid selection.")
+            return
+    except ValueError:
+        print("Invalid input.")
+        return
+    
+    todo_to_complete = user_todos[choice - 1]
+    
+    # Update the status and timestamp
+    todo_to_complete.status = Status.COMPLETED
+    todo_to_complete.updated_at = datetime.now().isoformat()
+    
+    # Find and update the original todo in the list
+    for i, todo in enumerate(todos):
+        if todo.id == todo_to_complete.id:
+            todos[i] = todo_to_complete
+            break
+    
+    save_todos(todos)
+    print(f"\n✓ To-Do item '{todo_to_complete.title}' marked as completed!")
+
 # =================== Post-Login Menu Handler ===================
 def handle_post_login_menu(username):
     """Handle the post-login menu loop.
@@ -364,7 +411,7 @@ def handle_post_login_menu(username):
         elif choice == "4":
             handle_edit_todo(username)
         elif choice == "5":
-            print("\n[TODO] Mark to-do as completed - coming soon!")
+            handle_mark_todo_completed(username)
         elif choice == "6":
             print(f"\nLogging out... Goodbye, {username}!")
             break
