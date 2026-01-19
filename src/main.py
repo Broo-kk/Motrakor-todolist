@@ -5,6 +5,7 @@ This module implements the CLI interface with a REPL-style interaction.
 
 import json
 import os
+from datetime import datetime
 from models import TodoItem, Priority, Status
 
 def display_pre_login_menu():
@@ -36,8 +37,9 @@ def display_post_login_menu(username):
     print("\n[1] Create To-Do Item")
     print("[2] View All To-Do Items")
     print("[3] View To-Do Item Details")
-    print("[4] Mark To-Do as Completed")
-    print("[5] Logout")
+    print("[4] Edit To-Do Item")
+    print("[5] Mark To-Do as Completed")
+    print("[6] Logout")
     print()
 
 
@@ -47,18 +49,18 @@ def get_post_login_choice():
     Returns:
         The user's choice as a string.
     """
-    choice = input("Please select an option (1-5): ").strip()
+    choice = input("Please select an option (1-6): ").strip()
     return choice
 
 # ================= Load & Save users from/to JSON =============== 
-def load_users(filename="login.json"):
+def load_users(filename="users.json"):
     """Load users from JSON file."""
     if os.path.exists(filename):
         with open(filename, 'r') as f:
             return json.load(f)
     return []
 
-def save_users(users, filename="login.json"):
+def save_users(users, filename="users.json"):
     """Save users to JSON file."""
     with open(filename, 'w') as f:
         json.dump(users, f, indent=4)
@@ -78,6 +80,35 @@ def save_todos(todos, filename="todos.json"):
     with open(filename, 'w') as f:
         json.dump(todos_data, f, indent=4)
 
+# ================= Load & Save login history from/to JSON =============== 
+def load_login_history(filename="login_history.json"):
+    """Load login history from JSON file."""
+    if os.path.exists(filename):
+        with open(filename, 'r') as f:
+            return json.load(f)
+    return []
+
+def save_login_history(history, filename="login_history.json"):
+    """Save login history to JSON file."""
+    with open(filename, 'w') as f:
+        json.dump(history, f, indent=4)
+
+def log_login_attempt(username, success):
+    """Log a login attempt to history file.
+    
+    Args:
+        username: The username attempting to login.
+        success: Boolean indicating if login was successful.
+    """
+    history = load_login_history()
+    login_record = {
+        "timestamp": datetime.now().isoformat(),
+        "username": username,
+        "success": success
+    }
+    history.append(login_record)
+    save_login_history(history)
+
 # =================== User Login here =================== 
 def handle_login(users):
     """Handle the login process.
@@ -92,8 +123,10 @@ def handle_login(users):
     for user in users:
         if user.get("username") == username and str(user.get("password")) == password:
             print(f"Login successful! Welcome back, {username}!")
+            log_login_attempt(username, True)
             return username
     print("Invalid username or password.")
+    log_login_attempt(username, False)
     return None
 
 # =================== User Signup here ===================
@@ -157,6 +190,85 @@ def handle_create_todo(username):
     print(f"  Priority: {priority.value}")
     print(f"  Status: {todo.status.value}")
 
+# =================== Edit Todo here ===================
+def handle_edit_todo(username):
+    """Handle editing an existing todo item.
+    
+    Args:
+        username: The username of the current user.
+    """
+    todos = load_todos()
+    
+    # Get user's todos
+    user_todos = [todo for todo in todos if todo.owner == username]
+    
+    if not user_todos:
+        print("\n✗ You have no to-do items to edit.")
+        return
+    
+    print("\n--- Edit To-Do Item ---")
+    print("\nYour to-do items:")
+    for idx, todo in enumerate(user_todos, 1):
+        print(f"[{idx}] {todo.title} (Priority: {todo.priority.value}, Status: {todo.status.value})")
+    
+    try:
+        choice = int(input("\nSelect item number to edit (0 to cancel): ").strip())
+        if choice == 0:
+            return
+        if choice < 1 or choice > len(user_todos):
+            print("Invalid selection.")
+            return
+    except ValueError:
+        print("Invalid input.")
+        return
+    
+    todo_to_edit = user_todos[choice - 1]
+    
+    print(f"\nEditing: '{todo_to_edit.title}'")
+    print("\nWhat would you like to edit?")
+    print("[1] Title")
+    print("[2] Details")
+    print("[3] Priority")
+    print("[4] Cancel")
+    
+    edit_choice = input("Select option (1-4): ").strip()
+    
+    if edit_choice == "1":
+        new_title = input("New title: ").strip()
+        if new_title:
+            todo_to_edit.title = new_title
+    elif edit_choice == "2":
+        new_details = input("New details: ").strip()
+        if new_details:
+            todo_to_edit.details = new_details
+    elif edit_choice == "3":
+        print("\nPriority levels:")
+        print("[1] HIGH")
+        print("[2] MID")
+        print("[3] LOW")
+        priority_choice = input("Select priority (1-3): ").strip()
+        priority_map = {"1": Priority.HIGH, "2": Priority.MID, "3": Priority.LOW}
+        if priority_choice in priority_map:
+            todo_to_edit.priority = priority_map[priority_choice]
+    elif edit_choice == "4":
+        return
+    else:
+        print("Invalid option.")
+        return
+    
+    # Update the timestamp
+    from datetime import datetime
+    todo_to_edit.updated_at = datetime.now().isoformat()
+    
+    # Find and update the original todo in the list
+    for i, todo in enumerate(todos):
+        if todo.id == todo_to_edit.id:
+            todos[i] = todo_to_edit
+            break
+    
+    save_todos(todos)
+    print(f"\n✓ To-Do item updated successfully!")
+
 # =================== Post-Login Menu Handler ===================
 def handle_post_login_menu(username):
     """Handle the post-login menu loop.
@@ -175,12 +287,14 @@ def handle_post_login_menu(username):
         elif choice == "3":
             print("\n[TODO] View to-do item details - coming soon!")
         elif choice == "4":
-            print("\n[TODO] Mark to-do as completed - coming soon!")
+            handle_edit_todo(username)
         elif choice == "5":
+            print("\n[TODO] Mark to-do as completed - coming soon!")
+        elif choice == "6":
             print(f"\nLogging out... Goodbye, {username}!")
             break
         else:
-            print("\nInvalid option. Please select 1-5.")
+            print("\nInvalid option. Please select 1-6.")
 
 def main():
     """Main application loop.
