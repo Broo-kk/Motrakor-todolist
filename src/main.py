@@ -218,6 +218,53 @@ def handle_view_all_todos(username):
         print(f"    Created: {todo.created_at}")
         print(f"    Updated: {todo.updated_at}")
 
+# =================== View Todo Details here ===================
+def handle_view_todo_details(username):
+    """Handle viewing detailed information about a specific todo item.
+    
+    Args:
+        username: The username of the current user.
+    """
+    todos = load_todos()
+    
+    # Get user's todos
+    user_todos = [todo for todo in todos if todo.owner == username]
+    
+    if not user_todos:
+        print("\n✗ You have no to-do items to view.")
+        return
+    
+    print("\n--- View To-Do Item Details ---")
+    print("\nYour to-do items:")
+    for idx, todo in enumerate(user_todos, 1):
+        status_symbol = "✓" if todo.status.value == "COMPLETED" else "○"
+        print(f"[{idx}] {status_symbol} {todo.title}")
+    
+    try:
+        choice = int(input("\nSelect item number to view (0 to cancel): ").strip())
+        if choice == 0:
+            return
+        if choice < 1 or choice > len(user_todos):
+            print("Invalid selection.")
+            return
+    except ValueError:
+        print("Invalid input.")
+        return
+    
+    todo = user_todos[choice - 1]
+    
+    print("\n" + "=" * 60)
+    print("  To-Do Item Details")
+    print("=" * 60)
+    print(f"\nTitle:        {todo.title}")
+    print(f"Details:      {todo.details if todo.details else 'N/A'}")
+    print(f"Priority:     {todo.priority.value}")
+    print(f"Status:       {todo.status.value}")
+    print(f"Owner:        {todo.owner}")
+    print(f"Created:      {todo.created_at}")
+    print(f"Updated:      {todo.updated_at}")
+    print("=" * 60)
+
 # =================== Edit Todo here ===================
 def handle_edit_todo(username):
     """Handle editing an existing todo item.
@@ -313,7 +360,7 @@ def handle_post_login_menu(username):
         elif choice == "2":
             handle_view_all_todos(username)
         elif choice == "3":
-            print("\n[TODO] View to-do item details - coming soon!")
+            handle_view_todo_details(username)
         elif choice == "4":
             handle_edit_todo(username)
         elif choice == "5":
