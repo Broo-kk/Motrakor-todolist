@@ -197,26 +197,39 @@ def handle_view_all_todos(username):
     Args:
         username: The username of the current user.
     """
-    todos = load_todos()
-    user_todos = [todo for todo in todos if todo.owner == username]
-    
-    if not user_todos:
-        print("\n✗ You have no to-do items yet.")
-        return
-    
-    print("\n" + "=" * 80)
-    print(f"  Your To-Do Items ({len(user_todos)} total)")
-    print("=" * 80)
-    
-    for idx, todo in enumerate(user_todos, 1):
-        status_symbol = "✓" if todo.status.value == "COMPLETED" else "○"
-        print(f"\n[{idx}] {status_symbol} {todo.title}")
-        print(f"    Priority: {todo.priority.value}")
-        print(f"    Status: {todo.status.value}")
-        if todo.details:
-            print(f"    Details: {todo.details}")
-        print(f"    Created: {todo.created_at}")
-        print(f"    Updated: {todo.updated_at}")
+    while True:
+        todos = load_todos()
+        user_todos = [todo for todo in todos if todo.owner == username]
+        
+        if not user_todos:
+            print("\n✗ You have no to-do items yet.")
+            input("\nPress Enter to return to menu...")
+            return
+        
+        print("\n" + "=" * 80)
+        print(f"  Your To-Do Items ({len(user_todos)} total)")
+        print("=" * 80)
+        
+        for idx, todo in enumerate(user_todos, 1):
+            status_symbol = "✓" if todo.status.value == "COMPLETED" else "○"
+            print(f"\n[{idx}] {status_symbol} {todo.title}")
+            print(f"    Priority: {todo.priority.value}")
+            print(f"    Status: {todo.status.value}")
+            if todo.details:
+                print(f"    Details: {todo.details}")
+            print(f"    Created: {todo.created_at}")
+            print(f"    Updated: {todo.updated_at}")
+        
+        print("\n" + "=" * 80)
+        print("[0] Return to Menu")
+        print("=" * 80)
+        
+        choice = input("\nSelect an option (0 to return): ").strip()
+        
+        if choice == "0":
+            return
+        else:
+            print("\nInvalid option. Please select 0 to return to menu.")
 
 # =================== View Todo Details here ===================
 def handle_view_todo_details(username):
@@ -225,45 +238,57 @@ def handle_view_todo_details(username):
     Args:
         username: The username of the current user.
     """
-    todos = load_todos()
-    
-    # Get user's todos
-    user_todos = [todo for todo in todos if todo.owner == username]
-    
-    if not user_todos:
-        print("\n✗ You have no to-do items to view.")
-        return
-    
-    print("\n--- View To-Do Item Details ---")
-    print("\nYour to-do items:")
-    for idx, todo in enumerate(user_todos, 1):
-        status_symbol = "✓" if todo.status.value == "COMPLETED" else "○"
-        print(f"[{idx}] {status_symbol} {todo.title}")
-    
-    try:
-        choice = int(input("\nSelect item number to view (0 to cancel): ").strip())
-        if choice == 0:
+    while True:
+        todos = load_todos()
+        
+        # Get user's todos
+        user_todos = [todo for todo in todos if todo.owner == username]
+        
+        if not user_todos:
+            print("\n✗ You have no to-do items to view.")
+            input("\nPress Enter to return to menu...")
             return
-        if choice < 1 or choice > len(user_todos):
-            print("Invalid selection.")
-            return
-    except ValueError:
-        print("Invalid input.")
-        return
-    
-    todo = user_todos[choice - 1]
-    
-    print("\n" + "=" * 60)
-    print("  To-Do Item Details")
-    print("=" * 60)
-    print(f"\nTitle:        {todo.title}")
-    print(f"Details:      {todo.details if todo.details else 'N/A'}")
-    print(f"Priority:     {todo.priority.value}")
-    print(f"Status:       {todo.status.value}")
-    print(f"Owner:        {todo.owner}")
-    print(f"Created:      {todo.created_at}")
-    print(f"Updated:      {todo.updated_at}")
-    print("=" * 60)
+        
+        print("\n--- View To-Do Item Details ---")
+        print("\nYour to-do items:")
+        for idx, todo in enumerate(user_todos, 1):
+            status_symbol = "✓" if todo.status.value == "COMPLETED" else "○"
+            print(f"[{idx}] {status_symbol} {todo.title}")
+        
+        try:
+            choice = int(input("\nSelect item number to view (0 to return to menu): ").strip())
+            if choice == 0:
+                return
+            if choice < 1 or choice > len(user_todos):
+                print("Invalid selection.")
+                continue
+        except ValueError:
+            print("Invalid input.")
+            continue
+        
+        todo = user_todos[choice - 1]
+        
+        while True:
+            print("\n" + "=" * 60)
+            print("  To-Do Item Details")
+            print("=" * 60)
+            print(f"\nTitle:        {todo.title}")
+            print(f"Details:      {todo.details if todo.details else 'N/A'}")
+            print(f"Priority:     {todo.priority.value}")
+            print(f"Status:       {todo.status.value}")
+            print(f"Owner:        {todo.owner}")
+            print(f"Created:      {todo.created_at}")
+            print(f"Updated:      {todo.updated_at}")
+            print("=" * 60)
+            print("[0] Return to Item List")
+            print("=" * 60)
+            
+            detail_choice = input("\nSelect an option (0 to return): ").strip()
+            
+            if detail_choice == "0":
+                break
+            else:
+                print("\nInvalid option. Please select 0 to return.")
 
 # =================== Edit Todo here ===================
 def handle_edit_todo(username):
@@ -351,45 +376,63 @@ def handle_mark_todo_completed(username):
     Args:
         username: The username of the current user.
     """
-    todos = load_todos()
-    
-    # Get user's todos that are not yet completed
-    user_todos = [todo for todo in todos if todo.owner == username and todo.status == Status.PENDING]
-    
-    if not user_todos:
-        print("\n✗ You have no pending to-do items to mark as completed.")
-        return
-    
-    print("\n--- Mark To-Do as Completed ---")
-    print("\nYour pending to-do items:")
-    for idx, todo in enumerate(user_todos, 1):
-        print(f"[{idx}] {todo.title} (Priority: {todo.priority.value})")
-    
-    try:
-        choice = int(input("\nSelect item number to mark as completed (0 to cancel): ").strip())
-        if choice == 0:
+    while True:
+        todos = load_todos()
+        
+        # Get user's todos that are not yet completed
+        user_todos = [todo for todo in todos if todo.owner == username and todo.status == Status.PENDING]
+        
+        if not user_todos:
+            print("\n✗ You have no pending to-do items to mark as completed.")
+            input("\nPress Enter to return to menu...")
             return
-        if choice < 1 or choice > len(user_todos):
-            print("Invalid selection.")
+        
+        print("\n--- Mark To-Do as Completed ---")
+        print("\nYour pending to-do items:")
+        for idx, todo in enumerate(user_todos, 1):
+            print(f"[{idx}] {todo.title} (Priority: {todo.priority.value})")
+        
+        try:
+            choice = int(input("\nSelect item number to mark as completed (0 to return to menu): ").strip())
+            if choice == 0:
+                return
+            if choice < 1 or choice > len(user_todos):
+                print("Invalid selection.")
+                continue
+        except ValueError:
+            print("Invalid input.")
+            continue
+        
+        todo_to_complete = user_todos[choice - 1]
+        
+        # Update the status and timestamp
+        todo_to_complete.status = Status.COMPLETED
+        todo_to_complete.updated_at = datetime.now().isoformat()
+        
+        # Find and update the original todo in the list
+        for i, todo in enumerate(todos):
+            if todo.id == todo_to_complete.id:
+                todos[i] = todo_to_complete
+                break
+        
+        save_todos(todos)
+        
+        print("\n" + "=" * 60)
+        print("  Completion Confirmation")
+        print("=" * 60)
+        print(f"\n✓ To-Do item '{todo_to_complete.title}' marked as completed!")
+        print(f"  Status: {todo_to_complete.status.value}")
+        print(f"  Updated: {todo_to_complete.updated_at}")
+        print("=" * 60)
+        print("[0] Return to Menu")
+        print("=" * 60)
+        
+        menu_choice = input("\nSelect an option (0 to return): ").strip()
+        
+        if menu_choice == "0":
             return
-    except ValueError:
-        print("Invalid input.")
-        return
-    
-    todo_to_complete = user_todos[choice - 1]
-    
-    # Update the status and timestamp
-    todo_to_complete.status = Status.COMPLETED
-    todo_to_complete.updated_at = datetime.now().isoformat()
-    
-    # Find and update the original todo in the list
-    for i, todo in enumerate(todos):
-        if todo.id == todo_to_complete.id:
-            todos[i] = todo_to_complete
-            break
-    
-    save_todos(todos)
-    print(f"\n✓ To-Do item '{todo_to_complete.title}' marked as completed!")
+        else:
+            print("\nInvalid option. Please select 0 to return to menu.")
 
 # =================== Post-Login Menu Handler ===================
 def handle_post_login_menu(username):
