@@ -1,7 +1,7 @@
 """Tests for the Calculator module."""
 
 import pytest
-from calculator import Calculator
+from calculator import Calculator, calculate_velocity
 
 
 class TestCalculatorBasicOperations:
@@ -155,3 +155,47 @@ class TestCalculatorFloatingPoint:
         """Test dividing floating point numbers."""
         result = calculator.divide(7.5, 2.5)
         assert result == 3.0
+
+
+class TestVelocityCalculation:
+    """Test velocity calculation functionality."""
+
+    def test_calculate_velocity_basic(self):
+        """Test basic velocity calculation."""
+        result = calculate_velocity(100, 10)
+        assert result == 10.0
+
+    def test_calculate_velocity_fractional(self):
+        """Test velocity calculation with fractional result."""
+        result = calculate_velocity(50, 4)
+        assert result == 12.5
+
+    def test_calculate_velocity_zero_distance(self):
+        """Test velocity calculation with zero distance."""
+        result = calculate_velocity(0, 10)
+        assert result == 0.0
+
+    def test_calculate_velocity_negative_distance(self):
+        """Test velocity calculation with negative distance (moving backwards)."""
+        result = calculate_velocity(-100, 10)
+        assert result == -10.0
+
+    def test_calculate_velocity_zero_time_raises_error(self):
+        """Test that zero time raises ValueError."""
+        with pytest.raises(ValueError, match="Time must be greater than zero"):
+            calculate_velocity(100, 0)
+
+    def test_calculate_velocity_negative_time_raises_error(self):
+        """Test that negative time raises ValueError."""
+        with pytest.raises(ValueError, match="Time must be greater than zero"):
+            calculate_velocity(100, -5)
+
+    def test_calculate_velocity_float_inputs(self):
+        """Test velocity calculation with float inputs."""
+        result = calculate_velocity(75.5, 5.2)
+        assert abs(result - 14.519) < 0.001
+
+    def test_calculate_velocity_large_numbers(self):
+        """Test velocity calculation with large numbers."""
+        result = calculate_velocity(1000000, 5000)
+        assert result == 200.0

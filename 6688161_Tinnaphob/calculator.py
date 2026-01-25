@@ -80,3 +80,23 @@ class Calculator:
             The last result stored
         """
         return self.last_result
+
+
+def calculate_velocity(distance: float, time: float) -> float:
+    """Calculate velocity given distance and time.
+
+    Velocity is calculated using the formula: velocity = distance / time
+
+    Args:
+        distance: The distance traveled (in any unit of length)
+        time: The time taken (in any unit of time)
+
+    Returns:
+        The velocity (distance per unit time)
+
+    Raises:
+        ValueError: If time is zero or negative
+    """
+    if time <= 0:
+        raise ValueError("Time must be greater than zero")
+    return distance / time
