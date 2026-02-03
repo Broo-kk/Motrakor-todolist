@@ -1,0 +1,31 @@
+C4Context
+    title System Context diagram for ICT To Do List
+    Person(student, "Student", "Manages personal tasks and views course assignments.")
+    Person(instructor, "Instructor", "Views teaching tasks and monitors assignment deadlines.")
+    Person(admin, "System Administrator", "Manages system configuration and monitors sync health.")
+    System_Ext(mycourses, "MyCourses", "External ICT e-learning system providing course and assignment data.")
+    
+    Container_Boundary(ict_todo, "ICT To Do List") {
+        Container(web_app, "Web App", "React", "Browser-based SPA for task management.")
+        Container(mobile_app, "Mobile App", "Flutter", "Cross-platform mobile app for iOS/Android.")
+        ContainerDb(database, "Database", "PostgreSQL", "Stores user profiles, tasks, and sync data.")
+        Container(mycourses_connector, "MyCourses Connector", "Python", "Integration module for MyCourses API.")
+    }
+
+    Container_Boundary(web_api, "Web API") {
+        Component(auth, "Authentication & Authorization", "Handles login, token validation, and access control.")
+        Component(task_mgmt, "Task Management", "Handles CRUD operations for tasks.")
+        Component(sync_orch, "MyCourses Sync Orchestrator", "Manages sync workflow and updates tasks.")
+        ComponentDb(data_access, "Data Access", "Repository for PostgreSQL access with transactions.")
+    }
+    Rel(student, web_app, "Uses", "HTTPS")
+    Rel(student, mobile_app, "Uses", "HTTPS")
+    Rel(instructor, web_app, "Uses", "HTTPS")
+    Rel(admin, web_app, "Uses", "HTTPS")
+    Rel(web_app, auth, "Authenticates user")
+    Rel(mobile_app, auth, "Authenticates user")
+    Rel(auth, task_mgmt, "Authorizes access")
+    Rel(task_mgmt, data_access, "CRUD operations")
+    Rel(data_access, database, "SQL queries")
+    Rel(sync_orch, mycourses, "Syncs data", "HTTPS/JSON")
+    Rel(sync_orch, task_mgmt, "Updates tasks")
